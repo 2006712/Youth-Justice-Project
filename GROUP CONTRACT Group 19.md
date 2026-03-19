@@ -46,6 +46,7 @@ Task Allocation
 - Mid-week progress updates  
 - GitHub commit checks  
 - Final group review before submission
+- - Final check for academic integrity and formatting before submission
   
 Integration
 All work will be merged through GitHub using pull requests. The group will review and test everything together before final submission.
