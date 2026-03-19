@@ -39,7 +39,8 @@ Task Allocation
 - Shereena Fernando: Documentation, coordination, and progress tracking  
 - Nathan Andrew Morgan: GitHub management and integration  
 - Anjana Weththasinghe : Development and research  
-- All members : Testing and quality checking  
+- All members : Testing and quality checking
+-  All members are responsible for reviewing each other’s work before final submission.
 
  Checkpoints
 - Weekly Teams meetings  
