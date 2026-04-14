@@ -74,3 +74,43 @@ class Offence(BaseModel):
 
     def __str__(self):
         return f"{self.offence_type} - {self.youth.name}"
+        
+class SupportProgram(models.Model):
+    CATEGORY_CHOICES = [
+        ('counselling', 'Counselling'),
+        ('training', 'Training'),
+        ('community_service', 'Community Service'),
+    ]
+
+    RISK_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+    ]
+
+    name = models.CharField(max_length=100)
+    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES)
+    description = models.TextField()
+    minimum_age = models.PositiveIntegerField()
+    maximum_age = models.PositiveIntegerField()
+    supported_risk_level = models.CharField(max_length=10, choices=RISK_CHOICES)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Recommendation(models.Model):
+    STATUS_CHOICES = [
+        ('suggested', 'Suggested'),
+        ('accepted', 'Accepted'),
+        ('completed', 'Completed'),
+    ]
+
+    youth = models.ForeignKey(Youth, on_delete=models.CASCADE)
+    support_program = models.ForeignKey(SupportProgram, on_delete=models.CASCADE)
+    recommendation_reason = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='suggested')
+
+    def __str__(self):
+        return f"{self.youth} -> {self.support_program}"
