@@ -43,6 +43,9 @@ class Youth(BaseModel):
 
     def __str__(self):
         return self.name
+        
+    def recommend_programs(self):
+    return SupportProgram.objects.eligible_for_youth(self)    
 
 
 # Offence model
@@ -95,12 +98,22 @@ class SupportProgram(models.Model):
     maximum_age = models.PositiveIntegerField()
     supported_risk_level = models.CharField(max_length=10, choices=RISK_CHOICES)
     active = models.BooleanField(default=True)
-
+    
+    objects = SupportProgramManager() 
+    
     def __str__(self):
         return self.name
+        )
+class SupportProgramManager(models.Manager):
+    def eligible_for_youth(self, youth):
+        return self.filter(
+            supported_risk_level=youth.calculate_risk_level(),
+            minimum_age__lte=youth.age,
+            maximum_age__gte=youth.age,
+            active=True
+        )
 
-
-class Recommendation(models.Model):
+class Recommendation(BaseModel):
     STATUS_CHOICES = [
         ('suggested', 'Suggested'),
         ('accepted', 'Accepted'),
