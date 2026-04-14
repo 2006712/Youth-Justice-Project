@@ -193,3 +193,43 @@ Consequences
 
 Code Reference
 justice/models.py (Youth and Offence models)
+
+---
+
+## ADR: Intervention-based recommendations should be done using a SupportProgram model.
+
+**Status:** Accepted
+
+**Context:**  
+The project is modeled to be a Youth Diversion and Support Matching System. The system should not just be interested in storing offence records only but it should also suggest appropriate support opportunities like counselling, training, and community service. These support options had to be represented in a separate model.
+
+**Alternatives considered:**  
+1. Save the program names in the form of plain text in Youth model.  
+2. Store program options within Recommendation model.  
+3. Prepare a SupportProgram model.  
+
+**Decision:**  
+Special SupportProgram model was developed with such fields like name, category, description, minimum age, maximum age, risk level supported and active status.
+
+**Consequences:**  
+Enhances structure, scalability, and recommends logic.
+
+---
+
+ADR: Have an eligibility logic of support program supported by a custom manager.
+
+**Status:** Accepted
+
+**Context:**  
+The system must have recommendations on programs according to age and risk. The repeat of filtering logic in more than one place complicates code.
+
+**Alternatives considered:**  
+1. Put logic in views  
+2. Lean logic to Youth model.  
+3. Custom manager.  
+
+**Decision:**  
+Used SupportProgramManager with eligibility to youth method, which is eligible_for_youth(youth).
+
+**Consequences:**  
+Less polluted, reusable and adheres to Django best practices.
