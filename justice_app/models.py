@@ -45,7 +45,7 @@ class Youth(BaseModel):
         return self.name
         
     def recommend_programs(self):
-    return SupportProgram.objects.eligible_for_youth(self)    
+        return SupportProgram.objects.eligible_for_youth(self)    
 
 
 # Offence model
