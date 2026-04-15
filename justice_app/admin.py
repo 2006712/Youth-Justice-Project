@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Youth, Offence
+from .models import Youth, Offence, SupportProgram
 
 
 @admin.register(Youth)
@@ -14,3 +14,10 @@ class OffenceAdmin(admin.ModelAdmin):
     list_display = ('youth', 'offence_type', 'severity', 'date_reported')
     search_fields = ('offence_type', 'notes', 'youth__name')
     list_filter = ('severity', 'offence_type', 'date_reported')
+
+
+@admin.register(SupportProgram)
+class SupportProgramAdmin(admin.ModelAdmin):
+    list_display = ('name', 'program_type', 'target_severity')
+    search_fields = ('name', 'description')
+    list_filter = ('program_type', 'target_severity')

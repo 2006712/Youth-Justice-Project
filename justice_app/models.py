@@ -1,8 +1,7 @@
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
 
 
-# Base model (for timestamps)
+# Base model for timestamps
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -13,33 +12,36 @@ class BaseModel(models.Model):
 
 # Youth model
 class Youth(BaseModel):
-    SCHOOL_STATUS_CHOICES = [
-        ('attending', 'Attending'),
-        ('dropped', 'Dropped Out'),
-        ('completed', 'Completed'),
-    ]
-
-    FAMILY_SUPPORT_CHOICES = [
-        ('low', 'Low'),
-        ('medium', 'Medium'),
-        ('high', 'High'),
-    ]
-
     GENDER_CHOICES = [
         ('male', 'Male'),
         ('female', 'Female'),
         ('other', 'Other'),
     ]
 
+    SCHOOL_STATUS_CHOICES = [
+        ('attending', 'Attending'),
+        ('dropped', 'Dropped Out'),
+        ('completed', 'Completed'),
+    ]
+
+    SUPPORT_LEVEL_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+    ]
+
     name = models.CharField(max_length=100)
-    age = models.PositiveIntegerField(validators=[MinValueValidator(10), MaxValueValidator(25)])
+    age = models.IntegerField()
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
-    background_notes = models.TextField(blank=True)
     school_status = models.CharField(max_length=20, choices=SCHOOL_STATUS_CHOICES)
-    family_support_level = models.CharField(max_length=10, choices=FAMILY_SUPPORT_CHOICES)
+    family_support_level = models.CharField(max_length=10, choices=SUPPORT_LEVEL_CHOICES)
+    background_notes = models.TextField(blank=True)
+
+    # NEW: Support programs relationship
+    support_programs = models.ManyToManyField('SupportProgram', blank=True)
 
     def get_recent_offences(self):
-        return self.offences.order_by('-date_reported')[:3]
+        return self.offences.all().order_by('-date_reported')[:5]
 
     def __str__(self):
         return self.name
@@ -53,11 +55,11 @@ class Offence(BaseModel):
         ('serious', 'Serious'),
     ]
 
-    OFFENCE_TYPE_CHOICES = [
+    OFFENCE_TYPES = [
         ('theft', 'Theft'),
         ('vandalism', 'Vandalism'),
         ('assault', 'Assault'),
-        ('drug_related', 'Drug Related'),
+        ('drug', 'Drug Related'),
         ('other', 'Other'),
     ]
 
@@ -67,10 +69,33 @@ class Offence(BaseModel):
         related_name='offences'
     )
 
-    offence_type = models.CharField(max_length=30, choices=OFFENCE_TYPE_CHOICES)
-    severity = models.CharField(max_length=10, choices=SEVERITY_CHOICES)
+    offence_type = models.CharField(max_length=50, choices=OFFENCE_TYPES)
+    severity = models.CharField(max_length=20, choices=SEVERITY_CHOICES)
     date_reported = models.DateField()
     notes = models.TextField(blank=True)
 
     def __str__(self):
         return f"{self.offence_type} - {self.youth.name}"
+
+
+# Support Program model (NEW)
+class SupportProgram(models.Model):
+    PROGRAM_TYPES = [
+        ('counselling', 'Counselling'),
+        ('training', 'Skill Training'),
+        ('community', 'Community Service'),
+    ]
+
+    SEVERITY_LEVELS = [
+        ('minor', 'Minor'),
+        ('moderate', 'Moderate'),
+        ('serious', 'Serious'),
+    ]
+
+    name = models.CharField(max_length=100)
+    program_type = models.CharField(max_length=20, choices=PROGRAM_TYPES)
+    target_severity = models.CharField(max_length=20, choices=SEVERITY_LEVELS)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
