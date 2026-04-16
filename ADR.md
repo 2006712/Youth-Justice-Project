@@ -494,3 +494,125 @@ Used AI tools such as ChatGPT.
 
 * Faster development
 * Needs to validate AI-generated code.
+
+ADR 1: Django Framework.
+
+## Status
+
+Accepted
+
+## Context
+
+The project will need a developed web-based application to handle youth information and suggestions.
+
+## Decision
+
+As the key framework, we selected Django.
+
+## Rationale
+
+Django offers such built-in functionality as ORM, administration panel and security.
+
+## Consequences
+
+* Faster development
+* Easier database handling
+* Must have knowledge of Django architecture.
+
+This view contains a recommendation logic that is defined in the ADR 2 recommendation logic.
+
+## Status
+
+Accepted
+
+## Context
+
+The system should propose appropriate programs on the basis of youth data.
+
+## Decision
+
+Django views are used to implement recommendation logic.
+
+## Rationale
+
+Views may be dynamically filtered and integrated with models.
+
+## Consequences
+
+* Flexible logic
+* Easy to update
+* Needs proper query processing.
+
+ADR 3: Django Templates.
+
+## Status
+
+Accepted
+
+## Context
+
+The app should have a frontend to present data.
+
+## Decision
+
+Templates in HTML and CSS of Django used.
+
+## Rationale
+
+Allows dynamic rendering and separation of concerns.
+
+## Consequences
+
+* Clean structure
+* Easy UI updates
+X Weak advanced UI.
+
+SQLite Database is used.
+
+## Status
+
+Accepted
+
+## Context
+
+Data on youth and programs needs a database.
+
+## Decision
+
+SQLite (default Django database) used.
+
+## Rationale
+
+* Easy setup
+* No external configuration
+* Suitable for small projects
+
+## Consequences
+
+* Simple to use
+* Not suitable to large scale production.
+
+Version control in GitHub.
+
+## Status
+
+Accepted
+
+## Context
+
+Several team members are needed to work on the project.
+
+## Decision
+
+Used GitHub to do version control and collaboration.
+
+## Rationale
+
+* Tracks changes
+* Supports teamwork
+* Maintains code history
+
+## Consequences
+
+* Better collaboration
+* needs to know Git commands.
