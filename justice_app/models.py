@@ -1,8 +1,9 @@
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
 
 
-# Base model (for timestamps)
+# -------------------------------
+# BASE MODEL (for timestamps)
+# -------------------------------
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -11,125 +12,114 @@ class BaseModel(models.Model):
         abstract = True
 
 
-# Youth model
-class Youth(BaseModel):
-    SCHOOL_STATUS_CHOICES = [
-        ('attending', 'Attending'),
-        ('dropped', 'Dropped Out'),
-        ('completed', 'Completed'),
-    ]
-
-    FAMILY_SUPPORT_CHOICES = [
-        ('low', 'Low'),
-        ('medium', 'Medium'),
-        ('high', 'High'),
-    ]
-
-    GENDER_CHOICES = [
-        ('male', 'Male'),
-        ('female', 'Female'),
-        ('other', 'Other'),
-    ]
-
-    name = models.CharField(max_length=100)
-    age = models.PositiveIntegerField(validators=[MinValueValidator(10), MaxValueValidator(25)])
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
-    background_notes = models.TextField(blank=True)
-    school_status = models.CharField(max_length=20, choices=SCHOOL_STATUS_CHOICES)
-    family_support_level = models.CharField(max_length=10, choices=FAMILY_SUPPORT_CHOICES)
-
-    def get_recent_offences(self):
-        return self.offences.order_by('-date_reported')[:3]
-
-    def __str__(self):
-        return self.name
-        
-    def recommend_programs(self):
-<<<<<<< HEAD
-        return SupportProgram.objects.eligible_for_youth(self)
-=======
-        return SupportProgram.objects.eligible_for_youth(self)    
->>>>>>> f3b933501d711867153131853a38a2e4b92c2fbd
-
-
-# Offence model
-class Offence(BaseModel):
-    SEVERITY_CHOICES = [
-        ('minor', 'Minor'),
-        ('moderate', 'Moderate'),
-        ('serious', 'Serious'),
-    ]
-
-    OFFENCE_TYPE_CHOICES = [
-        ('theft', 'Theft'),
-        ('vandalism', 'Vandalism'),
-        ('assault', 'Assault'),
-        ('drug_related', 'Drug Related'),
-        ('other', 'Other'),
-    ]
-
-    youth = models.ForeignKey(
-        Youth,
-        on_delete=models.CASCADE,
-        related_name='offences'
-    )
-
-    offence_type = models.CharField(max_length=30, choices=OFFENCE_TYPE_CHOICES)
-    severity = models.CharField(max_length=10, choices=SEVERITY_CHOICES)
-    date_reported = models.DateField()
-    notes = models.TextField(blank=True)
-
-    def __str__(self):
-        return f"{self.offence_type} - {self.youth.name}"
-    
-    
-class SupportProgramManager(models.Manager):
-    def eligible_for_youth(self, youth):
-        return self.filter(
-            supported_risk_level=youth.calculate_risk_level(),
-            minimum_age__lte=youth.age,
-            maximum_age__gte=youth.age,
-            active=True
-        )
-
-class SupportProgram(models.Model):
-    CATEGORY_CHOICES = [
+# -------------------------------
+# SUPPORT PROGRAM MODEL
+# -------------------------------
+class SupportProgram(BaseModel):
+    PROGRAM_TYPES = [
         ('counselling', 'Counselling'),
-        ('training', 'Training'),
-        ('community_service', 'Community Service'),
-    ]
-
-    RISK_CHOICES = [
-        ('low', 'Low'),
-        ('medium', 'Medium'),
-        ('high', 'High'),
+        ('education', 'Education Support'),
+        ('community', 'Community Service'),
+        ('rehabilitation', 'Rehabilitation'),
     ]
 
     name = models.CharField(max_length=100)
-    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES)
+    program_type = models.CharField(max_length=50, choices=PROGRAM_TYPES)
     description = models.TextField()
-    minimum_age = models.PositiveIntegerField()
-    maximum_age = models.PositiveIntegerField()
-    supported_risk_level = models.CharField(max_length=10, choices=RISK_CHOICES)
-    active = models.BooleanField(default=True)
-
-    objects = SupportProgramManager()
+    eligibility_criteria = models.TextField()
 
     def __str__(self):
         return self.name
-    
 
-class Recommendation(BaseModel):
-    STATUS_CHOICES = [
-        ('suggested', 'Suggested'),
-        ('accepted', 'Accepted'),
-        ('completed', 'Completed'),
+
+# -------------------------------
+# YOUTH MODEL
+# -------------------------------
+class Youth(BaseModel):
+    GENDER_CHOICES = [
+        ('Male', 'Male'),
+        ('Female', 'Female'),
+        ('Other', 'Other'),
+    ]
+
+    SCHOOL_STATUS_CHOICES = [
+        ('Attending', 'Attending'),
+        ('Dropped Out', 'Dropped Out'),
+        ('Completed', 'Completed'),
+    ]
+
+    SUPPORT_LEVEL_CHOICES = [
+        ('Low', 'Low'),
+        ('Medium', 'Medium'),
+        ('High', 'High'),
+    ]
+
+    name = models.CharField(max_length=100)
+    age = models.IntegerField()
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
+    school_status = models.CharField(max_length=20, choices=SCHOOL_STATUS_CHOICES)
+    family_support_level = models.CharField(max_length=10, choices=SUPPORT_LEVEL_CHOICES)
+    background_notes = models.TextField(blank=True)
+
+    # Many-to-Many relationship
+    support_programs = models.ManyToManyField(SupportProgram, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    # -------------------------------
+    # BUSINESS LOGIC (HD level)
+    # -------------------------------
+    def recommend_programs(self):
+        """
+        Recommend programs based on offence severity and support level
+        Demonstrates encapsulation (fat models, skinny views)
+        """
+        programs = SupportProgram.objects.all()
+
+        # Get all offences for this youth
+        offences = self.offence_set.all()
+
+        # Default: return all programs if no offences
+        if not offences.exists():
+            return programs
+
+        # Example logic
+        for offence in offences:
+            if offence.severity == 'Serious':
+                return programs.filter(program_type='rehabilitation')
+
+            elif offence.severity == 'Moderate':
+                return programs.filter(program_type__in=['counselling', 'education'])
+
+            elif offence.severity == 'Minor':
+                return programs.filter(program_type='community')
+
+        return programs
+
+
+# -------------------------------
+# OFFENCE MODEL
+# -------------------------------
+class Offence(BaseModel):
+    OFFENCE_TYPES = [
+        ('Theft', 'Theft'),
+        ('Vandalism', 'Vandalism'),
+        ('Assault', 'Assault'),
+        ('Drug Related', 'Drug Related'),
+        ('Other', 'Other'),
+    ]
+
+    SEVERITY_LEVELS = [
+        ('Minor', 'Minor'),
+        ('Moderate', 'Moderate'),
+        ('Serious', 'Serious'),
     ]
 
     youth = models.ForeignKey(Youth, on_delete=models.CASCADE)
-    support_program = models.ForeignKey(SupportProgram, on_delete=models.CASCADE)
-    recommendation_reason = models.TextField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='suggested')
+    offence_type = models.CharField(max_length=50, choices=OFFENCE_TYPES)
+    severity = models.CharField(max_length=10, choices=SEVERITY_LEVELS)
+    date_reported = models.DateField()
 
     def __str__(self):
-        return f"{self.youth} -> {self.support_program}"
+        return f"{self.offence_type} - {self.youth.name}"
