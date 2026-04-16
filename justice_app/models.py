@@ -1,57 +1,45 @@
 from django.db import models
 
 
-# -------------------------------
-# BASE MODEL (for timestamps)
-# -------------------------------
-class BaseModel(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
-
-
-# -------------------------------
+# =========================
 # SUPPORT PROGRAM MODEL
-# -------------------------------
-class SupportProgram(BaseModel):
+# =========================
+class SupportProgram(models.Model):
     PROGRAM_TYPES = [
-        ('counselling', 'Counselling'),
-        ('education', 'Education Support'),
-        ('community', 'Community Service'),
-        ('rehabilitation', 'Rehabilitation'),
+        ("Community", "Community"),
+        ("Counselling", "Counselling"),
+        ("Education", "Education"),
+        ("Rehabilitation", "Rehabilitation"),
+        ("Intensive Support", "Intensive Support"),
+        ("Mentoring", "Mentoring"),
     ]
 
     name = models.CharField(max_length=100)
     program_type = models.CharField(max_length=50, choices=PROGRAM_TYPES)
     description = models.TextField()
-    eligibility_criteria = models.TextField()
 
     def __str__(self):
         return self.name
 
 
-# -------------------------------
+# =========================
 # YOUTH MODEL
-# -------------------------------
-class Youth(BaseModel):
+# =========================
+class Youth(models.Model):
     GENDER_CHOICES = [
-        ('Male', 'Male'),
-        ('Female', 'Female'),
-        ('Other', 'Other'),
+        ("Male", "Male"),
+        ("Female", "Female"),
     ]
 
     SCHOOL_STATUS_CHOICES = [
-        ('Attending', 'Attending'),
-        ('Dropped Out', 'Dropped Out'),
-        ('Completed', 'Completed'),
+        ("Attending", "Attending"),
+        ("Dropped Out", "Dropped Out"),
     ]
 
     SUPPORT_LEVEL_CHOICES = [
-        ('Low', 'Low'),
-        ('Medium', 'Medium'),
-        ('High', 'High'),
+        ("Low", "Low"),
+        ("Medium", "Medium"),
+        ("High", "High"),
     ]
 
     name = models.CharField(max_length=100)
@@ -61,65 +49,77 @@ class Youth(BaseModel):
     family_support_level = models.CharField(max_length=10, choices=SUPPORT_LEVEL_CHOICES)
     background_notes = models.TextField(blank=True)
 
-    # Many-to-Many relationship
+    # Relationship to programs
     support_programs = models.ManyToManyField(SupportProgram, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
 
-    # -------------------------------
-    # BUSINESS LOGIC (HD level)
-    # -------------------------------
+
+    # =========================
+    # RECOMMENDATION LOGIC (HD LEVEL)
+    # =========================
     def recommend_programs(self):
         """
-        Recommend programs based on offence severity and support level
-        Demonstrates encapsulation (fat models, skinny views)
+        Rule-based recommendation system using offence severity + personal context
         """
-        programs = SupportProgram.objects.all()
 
-        # Get all offences for this youth
-        offences = self.offence_set.all()
+        programs = SupportProgram.objects.none()
 
-        # Default: return all programs if no offences
-        if not offences.exists():
+        # Get latest offence
+        latest_offence = self.offences.order_by('-date_reported').first()
+
+        if not latest_offence:
             return programs
 
-        # Example logic
-        for offence in offences:
-            if offence.severity == 'Serious':
-                return programs.filter(program_type='rehabilitation')
+        severity = latest_offence.severity
 
-            elif offence.severity == 'Moderate':
-                return programs.filter(program_type__in=['counselling', 'education'])
+        # 🔥 Core decision logic
+        if severity == "Minor":
+            programs = SupportProgram.objects.filter(program_type="Community")
 
-            elif offence.severity == 'Minor':
-                return programs.filter(program_type='community')
+        elif severity == "Moderate":
+            programs = SupportProgram.objects.filter(
+                program_type__in=["Counselling", "Education"]
+            )
 
-        return programs
+        elif severity == "Serious":
+            programs = SupportProgram.objects.filter(
+                program_type__in=["Rehabilitation", "Intensive Support"]
+            )
+
+        # 🔥 Context-aware improvements
+        if self.family_support_level == "Low":
+            programs = programs | SupportProgram.objects.filter(program_type="Mentoring")
+
+        if self.school_status == "Dropped Out":
+            programs = programs | SupportProgram.objects.filter(program_type="Education")
+
+        return programs.distinct()
 
 
-# -------------------------------
+# =========================
 # OFFENCE MODEL
-# -------------------------------
-class Offence(BaseModel):
-    OFFENCE_TYPES = [
-        ('Theft', 'Theft'),
-        ('Vandalism', 'Vandalism'),
-        ('Assault', 'Assault'),
-        ('Drug Related', 'Drug Related'),
-        ('Other', 'Other'),
+# =========================
+class Offence(models.Model):
+    SEVERITY_CHOICES = [
+        ("Minor", "Minor"),
+        ("Moderate", "Moderate"),
+        ("Serious", "Serious"),
     ]
 
-    SEVERITY_LEVELS = [
-        ('Minor', 'Minor'),
-        ('Moderate', 'Moderate'),
-        ('Serious', 'Serious'),
-    ]
+    youth = models.ForeignKey(
+        Youth,
+        on_delete=models.CASCADE,
+        related_name="offences"
+    )
 
-    youth = models.ForeignKey(Youth, on_delete=models.CASCADE)
-    offence_type = models.CharField(max_length=50, choices=OFFENCE_TYPES)
-    severity = models.CharField(max_length=10, choices=SEVERITY_LEVELS)
+    offence_type = models.CharField(max_length=100)
+    severity = models.CharField(max_length=10, choices=SEVERITY_CHOICES)
+    notes = models.TextField(blank=True)
     date_reported = models.DateField()
 
     def __str__(self):
-        return f"{self.offence_type} - {self.youth.name}"
+        return f"{self.youth.name} - {self.offence_type}"

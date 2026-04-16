@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Support Recommendations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #34495e;
+            color: white;
+            text-align: center;
+            padding: 25px 15px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 30px auto;
+        }
+
+        .section {
+            background: white;
+            margin-bottom: 25px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        h1, h2, h3 {
+            margin-top: 0;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .program-card {
+            background: #f8f9fb;
+            border-left: 6px solid #3498db;
+            padding: 18px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+
+        .reason-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .btn:hover {
+            background-color: #2c80b4;
+        }
+
+        .empty-message {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Support Recommendations</h1>
+</header>
+
+<div class="container">
+
+    <div class="section">
+        <h2>{{ youth.name }}</h2>
+        <p><span class="label">Age:</span> {{ youth.age }}</p>
+        <p><span class="label">Gender:</span> {{ youth.gender }}</p>
+        <p><span class="label">School Status:</span> {{ youth.school_status }}</p>
+        <p><span class="label">Family Support Level:</span> {{ youth.family_support_level }}</p>
+
+        {% if latest_offence %}
+            <p><span class="label">Latest Offence:</span> {{ latest_offence.offence_type }}</p>
+            <p><span class="label">Severity:</span> {{ latest_offence.severity }}</p>
+            <p><span class="label">Date Reported:</span> {{ latest_offence.date_reported }}</p>
+        {% else %}
+            <p class="empty-message">No offence records available for this youth.</p>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <h3>Why these programs were recommended</h3>
+        <ul class="reason-list">
+            {% for reason in reasons %}
+                <li>{{ reason }}</li>
+            {% empty %}
+                <li>No explanation available.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="section">
+        <h3>Recommended Support Programs</h3>
+
+        {% for program in programs %}
+            <div class="program-card">
+                <h4>{{ program.name }}</h4>
+                <p><span class="label">Program Type:</span> {{ program.program_type }}</p>
+                <p>{{ program.description }}</p>
+            </div>
+        {% empty %}
+            <p class="empty-message">No support programs matched this youth's current profile.</p>
+        {% endfor %}
+
+        <a href="/" class="btn">Back to Home</a>
+    </div>
+
+</div>
+
+</body>
+</html>

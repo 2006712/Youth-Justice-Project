@@ -1,136 +1,61 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.db.models import Q
-from .models import Youth, Offence, SupportProgram
-from .forms import YouthForm, OffenceForm, SupportProgramForm
+from django.shortcuts import render, get_object_or_404
+from .models import Youth
 
 
-# -------------------------------
-# HOME VIEW
-# -------------------------------
 def home(request):
-    # Show all youths ordered by latest
+    """
+    Display all registered youths on the home page.
+    Ordered by newest first.
+    """
     youths = Youth.objects.all().order_by('-created_at')
 
-    # Simple search functionality
-    search_query = request.GET.get('search')
-    if search_query:
-        youths = youths.filter(
-            Q(name__icontains=search_query) |
-            Q(school_status__icontains=search_query)
-        )
-
     context = {
-        'youths': youths,
-        'search_query': search_query
+        'youths': youths
     }
 
     return render(request, 'home.html', context)
 
 
-# -------------------------------
-# YOUTH LIST VIEW
-# -------------------------------
-def youth_list(request):
-    youths = Youth.objects.all().order_by('name')
-
-    # Filter by gender
-    gender = request.GET.get('gender')
-    if gender:
-        youths = youths.filter(gender=gender)
-
-    return render(request, 'youth_list.html', {
-        'youths': youths
-    })
-
-
-# -------------------------------
-# OFFENCE LIST VIEW
-# -------------------------------
-def offence_list(request):
-    offences = Offence.objects.select_related('youth').all().order_by('-date_reported')
-
-    # Filter by severity
-    severity = request.GET.get('severity')
-    if severity:
-        offences = offences.filter(severity=severity)
-
-    return render(request, 'offence_list.html', {
-        'offences': offences
-    })
-
-
-# -------------------------------
-# SUPPORT PROGRAM LIST
-# -------------------------------
-def support_program_list(request):
-    programs = SupportProgram.objects.all()
-
-    return render(request, 'program_list.html', {
-        'programs': programs
-    })
-
-
-# -------------------------------
-# RECOMMENDATION VIEW
-# -------------------------------
 def recommendations(request, youth_id):
+    """
+    Show recommended support programs for a selected youth.
+    Also explain why these recommendations were generated.
+    """
     youth = get_object_or_404(Youth, id=youth_id)
 
-    # Core logic delegated to model (HD design)
+    # Get latest offence for decision logic
+    latest_offence = youth.offences.order_by('-date_reported').first()
+
     programs = youth.recommend_programs()
+    reasons = []
 
-    return render(request, 'recommendations.html', {
+    if latest_offence:
+        reasons.append(f"Latest offence severity: {latest_offence.severity}")
+        reasons.append(f"Latest offence type: {latest_offence.offence_type}")
+
+    if youth.family_support_level == "Low":
+        reasons.append("Low family support indicates need for extra guidance and mentoring.")
+
+    elif youth.family_support_level == "Medium":
+        reasons.append("Moderate family support suggests benefit from structured intervention.")
+
+    if youth.school_status == "Dropped Out":
+        reasons.append("Youth is currently out of school, so education-focused support is relevant.")
+
+    elif youth.school_status == "Attending":
+        reasons.append("Youth is still connected to school, which supports rehabilitation through structured programs.")
+
+    if not latest_offence:
+        reasons.append("No offence history found, so no specific recommendation could be generated.")
+
+    if not programs:
+        reasons.append("No exact program match was found based on the current rules.")
+
+    context = {
         'youth': youth,
-        'programs': programs
-    })
+        'programs': programs,
+        'reasons': reasons,
+        'latest_offence': latest_offence,
+    }
 
-
-# -------------------------------
-# ADD YOUTH
-# -------------------------------
-def add_youth(request):
-    if request.method == 'POST':
-        form = YouthForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('youth_list')
-    else:
-        form = YouthForm()
-
-    return render(request, 'add_youth.html', {
-        'form': form
-    })
-
-
-# -------------------------------
-# ADD OFFENCE
-# -------------------------------
-def add_offence(request):
-    if request.method == 'POST':
-        form = OffenceForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('offence_list')
-    else:
-        form = OffenceForm()
-
-    return render(request, 'add_offence.html', {
-        'form': form
-    })
-
-
-# -------------------------------
-# ADD SUPPORT PROGRAM
-# -------------------------------
-def add_support_program(request):
-    if request.method == 'POST':
-        form = SupportProgramForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('support_program_list')
-    else:
-        form = SupportProgramForm()
-
-    return render(request, 'add_program.html', {
-        'form': form
-    })
+    return render(request, 'recommendations.html', context)
