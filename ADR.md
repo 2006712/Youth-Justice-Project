@@ -375,4 +375,122 @@ The system is based on youth justice practice in the world but also demonstrates
 **Consequences:**  
 Less polluted, reusable and adheres to Django best practices.
 >>>>>>> b905a980f57daac774bb526b593ea165c697a50a
+>>>>>>>
 
+(ADR 1) Database design using models.
+
+## Status
+
+Accepted
+
+## Context
+
+The system needs to be properly stored in data.
+
+## Decision
+
+Database design with used Django models.
+
+## Rationale
+
+Models offer articulate structure and relationships.
+
+## Consequences
+
+* Efficient data handling
+* Needs to be designed properly.
+
+ADR 2: Django Admin Panel.
+
+## Status
+
+Accepted
+
+## Context
+
+Information must be handled in a convenient way.
+
+## Decision
+
+Used Django admin panel.
+
+## Rationale
+
+Offers pre-made interface in data management.
+
+## Consequences
+
+* Faster data entry
+* Limited customization
+
+Aim: Learn to design a webpage using HTML and CSS.
+
+## Status
+
+Accepted
+
+## Context
+
+The interface to the system must be user-friendly.
+
+## Decision
+
+UI was built with used simple HTML and CSS.
+
+## Rationale
+
+* Easy to implement
+* Clear presentation
+
+## Consequences
+
+* Simple design
+* Limited advanced features
+
+Application: Migrations should be used to update databases.
+
+## Status
+
+Accepted
+
+## Context
+
+Development of database structure.
+
+## Decision
+
+Used Django migrations.
+
+## Rationale
+
+Allows proper and safe database updates.
+
+## Consequences
+
+* Easy updates
+* Requires migration management
+
+ADR 5: Development Support through AI Tools.
+
+## Status
+
+Accepted
+
+## Context
+
+There is a lot of coding and debugging in the project.
+
+## Decision
+
+Used AI tools such as ChatGPT.
+
+## Rationale
+
+* Helps generate code
+* Assists debugging
+* Improves productivity
+
+## Consequences
+
+* Faster development
+* Needs to validate AI-generated code.
