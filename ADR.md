@@ -1,229 +1,112 @@
-Architecture Decision Records (ADR).
 
-This report documents major decisions taken in the architecture of the development of Youth Diversion and Support Matching System. The systematic design thinking can be seen in each choice where the circumstances, options, resolution, and outcomes are given.
+ADR 1: Separation of Core Entities into Models.
 
-ADR 1: Youth-linked Separate Offence Model.
+Context
+The system should be in control of various kinds of data such as youth profiles, offence records and support programs. All these depict a different thing with its own set of attributes and duties.
 
-Status: Accepted
+Decision
+Each core entity had its own separate Django models:
+- Youth
+- Offence
+- SupportProgram
+
+This makes each entity work independently in the system.
+
+Consequences
+- Enhances maintainability and modularity.
+- Facilitates clean and structured database design.
+- Conforms to principles of object-oriented programming.
+- Makes the system more extendible in future.
+
+ADR 2: One-to-Many Youth, Offence Relationship.
+
+Context
+There may be several offences committed by one youth. All offences must be marked individually although associated with the appropriate youth.
+
+Decision
+ForeignKey relationship between Offence and Youth was implemented:
+
+```python
+youth = models.ForeignKey(Youth, ondelete=models.CASCADE, relatedname='offences')
+
+Consequences
+	•	Allows one-to-many (one youth to many offences) relationship.
+	•	Allows access to offence history of every youth.
+	•	Enables the latest offence to be identified in order to make a recommendation logic.
+	•	Upholds regular database format.
+
+⸻
+
+ADR 3: Multiple to Multiple Relationship between Youth and Support Programs.
 
 Context
 
-Some of these offences may be perpetrated by the same youth with time. Having all the offence information contained in the Youth model would be redundant and would be inefficient to scale.
-
-Alternatives Considered
-
-1) Hit and miss offence within Youth model.
-
-   Not scalable
-   Causes data duplication
-
-2. Develop another Offence model.
-
-   Structured data
-   Supports multiple records
+A youth can be involved in numerous support programs, and support program can be allocated to a number of youths. The relation should be elastic, extendable.
 
 Decision
 
-Another Offence model was defined and was connected with Youth through a ForeignKey.
+A ManyToManyField was used in the Youth model:
+
+support_programs = models.ManyToManyField(SupportProgram, blank=True)
 
 Consequences
+	•	Provides the flexibility of assigning programs to youngsters.
+	•	Avoids duplication of data
+	•	Facilitates additional improvement in the future (tracking participation).
+	•	Makes managing relationships easier with Django ORM.
 
- Supports one-to-many relationship
- Improves scalability and normalization
- Enables efficient querying
+⸻
 
-Code Reference: 
-
-ADR 2: Use ForeignKey for Youth–Offence Relationship
-
-Status: Accepted
+ADR 4: Attributes Filters in SupportProgram.
 
 Context
 
-There is only one young individual associated with an offence and a youth can be associated with several offenses.
-
-Alternatives Considered
-
-1. ManyToMany
-
-   Incorrect relationship representation
-
-2. ForeignKey
-
-   Accurately represents one-to-many
+The system should suggest appropriate support programs according to youth attributes like age and level of offence. This makes it necessary to filter dynamically.
 
 Decision
 
-ForeignKey on Offence model to Youth that is used.
+The SupportProgram model was modified to include additional fields:
+	•	min_age
+	•	max_age
+	•	risk_level
+
+These characteristics are applied in matching programs with the profiles of youth.
 
 Consequences
+	•	Allows interactive filtering with QuerySets.
+	•	Favours customised and pertinent suggestions.
+	•	Eliminates hardcoding.
+	•	Enhances intelligence of a system.
 
-Maintains referential integrity
-Simplifies queries
-Reflects real-world structure
+⸻
 
-ADR 3: Add BaseModel of Shared Fields.
-
-Status: Accepted
+Given query sets, recommend logic.
 
 Context
 
-Every model must have such common fields as createdat and updatedat.
-
-Alternatives Considered
-
-Please duplicate fields in both the models.
-
-   Repetitive
-   Hard to maintain
-
-2. Abstract BaseModel
-
-   Reusable
-   Cleaner design
+The system should be able to come up with the recommendations in real time using the up-to-date data on the youth (such as age, severity of offence, school status, and level of family support expected to support him/her).
 
 Decision
 
-Developed a BaseModel, upon which Youth and Offence are based.
+Django QuerySets were used to implement the logic of recommendation in the application:
+
+programs = SupportProgram.objects.filter(
+    minage_lte=youth.age,
+    maxage_gte=youth.age
+)
+
+Further screening is done according to the severity of offenses and youth status.
 
 Consequences
+	•	Scalable and efficient data filtering.
+	•	Maintains logic dynamic, flexible.
+	•	Does not use raw SQL, which makes it easier to read and more secure.
+	•	Conforms to Django best practices.
 
-Reduces duplication
-Improves maintainability
-Abides by Django best practices.
 
-ADR 4: Model business logic.
+Conclusion
 
-Status: Accepted
-
-Context
-
-Logic, including the retrieval of recent offences or programs recommended, are applied in several aspects of the system.
-
-Alternatives Considered
-
-Embed logics in views.
-
-   Not reusable
-   Breaks separation of concerns.
-
-2. Put logic within models.
-
-   Reusable
-   Cleaner architecture
-
-Decision
-
-Introduction of approaches like:
-
-getrecentoffences()
-recommend_programs()
-  within the Youth model.
-
-Consequences
-
-Improves encapsulation
-Abides by thin views (easy views).
-Encourages reuse
-
-ADR 5: Formulate The Youth Model to Show the Real World Diversity.
-
-Status: Accepted
-
-Context
-
-Young people in the justice system belong to various origins, and do not necessarily include school children.
-
-Alternatives Considered
-
-1. simplified model (students only)
-
-   Unrealistic
-   Limited analysis
-
-2. Expanded attributes
-
-   More realistic
-   Better decision-making
-
-Decision
-
-Included fields:
-
-school_status
-familysupportlevel
-background_notes
-
-Consequences
-
-Improves realism
-Supports better recommendations
-Enables future analytics
-
-ADR 6: Implement a Diversion-based System, as an alternative to Crime Tracking.
-
-Status: Accepted
-
-Context
-
-Unlike the old systems which are based on the registration of the offences, the youth justice of the day leans more on rehabilitation.
-
-Alternatives Considered
-
-1. Crime tracking system
-
-   Focuses on punishment
-   Limited impact
-
-2. Support-based system
-
-   Focuses on rehabilitation
-   More meaningful
-
-Decision
-
-Established a Youth Diversion and Support Matching System.
-
-Consequences
-
-Corresponds with actual activities.
-Supports early intervention
-Improves ethical design
-
-ADR 7: Present SupportProgram Model with recommendations.
-
-Status: Accepted
-
-Context
-
-The system needs to prescribe support programs in accordance to the youth data and severity of offences.
-
-Alternatives Considered
-
-1. Name text Stores 1. Name as a text: program name.
-
-   Not scalable
-   Difficult to manage
-
-2. Develop individual SupportProgram model.
-
-   Structured
-   Extendable
-
-Decision
-
-Since it is our SupportProgram model, fields are:
-
-name
-program_type
-target_severity
-description
-
-Consequences
-
-Enables structured recommendations
-Improves scalability
-Supports future enhancements
+The architectural choices of this system are aimed at developing a scaled, maintainable and a structured solution. The system allows it to recommend appropriate support programs to the youth according to individual situations and is therefore suitable to achieve its aim using normalized models, appropriate relationships and dynamic QuerySet filtering.
 
 ADR 8: ManyToMany supportprogram Youth relationship.
 <<<<<<< HEAD
