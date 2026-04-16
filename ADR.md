@@ -226,6 +226,8 @@ Improves scalability
 Supports future enhancements
 
 ADR 8: ManyToMany supportprogram Youth relationship.
+<<<<<<< HEAD
+=======
 
 Status: Accepted
 
@@ -296,3 +298,80 @@ These choices will guarantee:
  Scalable and maintainable architecture
 
 The system is based on youth justice practice in the world but also demonstrates best practices in Django design.
+---
+>>>>>>> b905a980f57daac774bb526b593ea165c697a50a
+
+Status: Accepted
+
+Context
+
+Various programs may be offered and taken up by a youth, as well as the same program may be offered to several youths.
+
+Alternatives Considered
+
+1. One-to-many relationship
+
+   Too restrictive
+
+2. Many-to-many
+
+   Flexible
+   Realistic
+
+Decision
+
+Used ManyToManyField in Youth model.
+
+Consequences
+
+Supports flexible assignments
+Improves data relationships
+Reflects real-world scenarios
+
+<<<<<<< HEAD
+ADR 9: Use Recommendation Logic by Severity.
+
+Status: Accepted
+
+Context
+
+The system ought to be smart in its proposal of programs depending on the severity of the offense.
+
+Alternatives Considered
+
+1. Hardcoded recommendations
+
+   Not flexible
+
+2. Data-based dynamic logic.
+
+   Scalable
+   Maintainable
+
+Decision
+
+Implemented logic of recommendation in Youth model using:
+
+offence severity ranking
+filtering SupportProgram
+
+Consequences
+
+Enables dynamic recommendations
+Improves system intelligence
+Shows business logic design.
+
+Summary
+
+These choices will guarantee:
+
+ Strong object-oriented design
+ Appropriate data modelling and relationships.
+ Well defined isolation of concerns.
+ Scalable and maintainable architecture
+
+The system is based on youth justice practice in the world but also demonstrates best practices in Django design.
+=======
+**Consequences:**  
+Less polluted, reusable and adheres to Django best practices.
+>>>>>>> b905a980f57daac774bb526b593ea165c697a50a
