@@ -1,113 +1,196 @@
+Architecture Decision Record (ADR).
 
-ADR 1: Separation of Core Entities into Models.
+Project: Youth Diversion & Support Matching System
 
-Context
-The system should be in control of various kinds of data such as youth profiles, offence records and support programs. All these depict a different thing with its own set of attributes and duties.
+ADR 1: Core Entities Separated Models.
+Status: Accepted  
 
-Decision
-Each core entity had its own separate Django models:
-- Youth
-- Offence
-- SupportProgram
+Context  
+The data types that need to be handled by the system are the youth, offences and support programs.
 
-This makes each entity work independently in the system.
+Alternatives  
+- Single model -good performance, due to simplicity but it has poor scalability and redundancy of data.  
+- Separate models → easier to maintain and structure (chosen)
 
-Consequences
-- Enhances maintainability and modularity.
-- Facilitates clean and structured database design.
-- Conforms to principles of object-oriented programming.
-- Makes the system more extendible in future.
+Decision  
+Created Youth, Offence, and SupportProgram models.
 
-ADR 2: One-to-Many Youth, Offence Relationship.
+Code Reference  
+justice_app/models.py: 5–80  
 
-Context
-There may be several offences committed by one youth. All offences must be marked individually although associated with the appropriate youth.
+Consequences  
+- Improved maintainability and structure.  
+- Supports object-oriented design  
+- Conforms to Django model-driven architecture.  
 
-Decision
-ForeignKey relationship between Offence and Youth was implemented:
+ADR 2: One-to-Many (Youth → Offence)
+Status: Accepted  
 
-```python
-youth = models.ForeignKey(Youth, ondelete=models.CASCADE, relatedname='offences')
+Context  
+More than once may a youth commit many offences.
 
-Consequences
-	•	Allows one-to-many (one youth to many offences) relationship.
-	•	Allows access to offence history of every youth.
-	•	Enables the latest offence to be identified in order to make a recommendation logic.
-	•	Upholds regular database format.
+Alternatives  
+- Store crimes in Youth → no adequate history tracking.  
+- Separate model with ForeignKey to has ForeignKey - multiple records (chosen).
 
-⸻
+Decision  
+FK Youth to Offence.
 
-ADR 3: Multiple to Multiple Relationship between Youth and Support Programs.
+Code Reference  
+justice_app/models.py: 82–110  
 
-Context
+Consequences  
+- Supports offence history  
+- Allows access to most recent offence.  
+- A little more advanced queries.  
 
-A youth can be involved in numerous support programs, and support program can be allocated to a number of youths. The relation should be elastic, extendable.
+ADR 3: Youth Multiple to Multiple (Youth ↔ SupportProgram)
+Status: Accepted  
 
-Decision
+Context  
+There are various support programs that can be done by youth.
 
-A ManyToManyField was used in the Youth model:
+Alternatives  
+- ForeignKey - restricts to one youth per program.  
+ManyToMany 1 many to many (chosen).
 
-support_programs = models.ManyToManyField(SupportProgram, blank=True)
+Decision  
+Used ManyToManyField in Youth.
 
-Consequences
-	•	Provides the flexibility of assigning programs to youngsters.
-	•	Avoids duplication of data
-	•	Facilitates additional improvement in the future (tracking participation).
-	•	Makes managing relationships easier with Django ORM.
+Code Reference  
+justice_app/models.py: 25–35  
 
-⸻
+Consequences  
+- Flexible program assignment  
+- Scalable relationship design  
+- Adds relational complexity  
 
-ADR 4: Attributes Filters in SupportProgram.
+ADR 4: Append Filters in SupportProgram.
+Status: Accepted  
 
-Context
+Context  
+Programs should be appropriate to the youth characteristics including age and level of risk.
 
-The system should suggest appropriate support programs according to youth attributes like age and level of offence. This makes it necessary to filter dynamically.
+Alternatives  
+- Simple model - no significant filtering.  
+- Add filtering fields-Dynamic matching (chosen) is possible.
 
-Decision
+Decision  
+Appendix minage, maxage and risk level.
 
-The SupportProgram model was modified to include additional fields:
-	•	min_age
-	•	max_age
-	•	risk_level
+Code Reference  
+justice_app/models.py: 40–70  
 
-These characteristics are applied in matching programs with the profiles of youth.
+Consequences  
+- Enables personalised recommendations  
+- Improves system intelligence  
+- Demands precise input of data.  
 
-Consequences
-	•	Allows interactive filtering with QuerySets.
-	•	Favours customised and pertinent suggestions.
-	•	Eliminates hardcoding.
-	•	Enhances intelligence of a system.
+ADR 5: Use QuerySets for Recommendations
+Status: Accepted  
 
-⸻
+Context  
+Guidelines need to be dynamic and scalable.
 
-Given query sets, recommend logic.
+Alternatives  
+- Hardcoded logic → not maintainable  
+- QuerySets → dynamic and scalable (chosen)
 
-Context
+Decision  
+Filtered support programs by using Django QuerySet.
 
-The system should be able to come up with the recommendations in real time using the up-to-date data on the youth (such as age, severity of offence, school status, and level of family support expected to support him/her).
+Code Reference  
+justice_app/views.py: 10–50  
 
-Decision
+Consequences  
+- Efficient and scalable logic  
+- Militates with Django ORM.  
+- Relies on clean database information.  
 
-Django QuerySets were used to implement the logic of recommendation in the application:
+ADR 6: Use Latest Offence
+Status: Accepted  
 
-programs = SupportProgram.objects.filter(
-    minage_lte=youth.age,
-    maxage_gte=youth.age
-)
+Context  
+There could be various offenders on the record of youth.
 
-Further screening is done according to the severity of offenses and youth status.
+Alternatives  
+- First time offence - not reliable.  
+- Latest offence→ represents current behaviour (chosen)
 
-Consequences
-	•	Scalable and efficient data filtering.
-	•	Maintains logic dynamic, flexible.
-	•	Does not use raw SQL, which makes it easier to read and more secure.
-	•	Conforms to Django best practices.
+Decision  
+Recently committed crime used in the reasoning process.
 
+Code Reference  
+justice_app/views.py: 20–40  
 
-Conclusion
+Consequences  
+- straightforward and explicit reasoning.  
+- Easy to explain  
+- Does not take into account entire offence history.  
 
-The architectural choices of this system are aimed at developing a scaled, maintainable and a structured solution. The system allows it to recommend appropriate support programs to the youth according to individual situations and is therefore suitable to achieve its aim using normalized models, appropriate relationships and dynamic QuerySet filtering.
+ADR 7: Explanation of Show Recommendation.
+Status: Accepted  
 
+Context  
+Users should have the knowledge of the reasons behind recommendations.
+
+Alternatives  
+- Show programs only → is not that transparent.  
+- Show explanation => enhances clarity (chosen)
+
+Decision  
+Added a why recommended section to UI.
+
+Code Reference  
+justice_app/views.py: 45–65  
+justice_app/templates/recommendations.html: 15–40  
+
+Consequences  
+- Improves transparency  
+- Strengthens system justification  
+- Marginal rise in the complexity of UIs.  
+
+ADR 8: Distinguish Logic and UI.
+Status: Accepted  
+
+Context  
+Templates are not supposed to put business logic.
+
+Alternatives  
+- Logic in templates → difficult to maintain.  
+- Logic in views/models → clean structure (chosen)
+
+Decision  
+Sharing Django CMS framework.
+
+Code Reference  
+justice_app/views.py: 1–70  
+justice_app/templates/: all files  
+
+Consequences  
+- Separation of concerns a la carte.  
+Easier debugging and maintenance.  
+
+ADR 9: Follow Django Design Principles
+Status: Accepted  
+
+Context  
+The right architectural practice should be adopted in the system.
+
+Decision  
+The Django design principles that have been applied:
+- DRY (Don’t Repeat Yourself)  
+- Thin Views, Fat Models.  
+- Separation of concerns  
+
+Code Reference  
+justice_app/models.py: 1–120  
+justice_app/views.py: 1–70  
+
+Consequences  
+- Tidy and most maintainable code.  
+-Good adherence to Django best practices.  
+- Needs wise design choices.
 ADR 8: ManyToMany supportprogram Youth relationship.
 <<<<<<< HEAD
 =======
