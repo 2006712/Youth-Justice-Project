@@ -23,8 +23,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Your app
+    # Project apps
     'justice_app',
+    'accounts',
 ]
 
 
@@ -44,15 +45,15 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'proj_my.urls'
 
 
-# TEMPLATES (IMPORTANT PART)
+# TEMPLATES
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
 
-        # 👇 This allows global templates if needed
+        # Allows global templates folder
         'DIRS': [BASE_DIR / 'templates'],
 
-        # 👇 This allows templates inside app (justice_app/templates)
+        # Allows templates inside app folders
         'APP_DIRS': True,
 
         'OPTIONS': {
@@ -71,7 +72,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'proj_my.wsgi.application'
 
 
-# DATABASE (SQLite)
+# DATABASE
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -102,6 +103,13 @@ USE_TZ = True
 
 # STATIC FILES
 STATIC_URL = 'static/'
+
+
+# LOGIN / LOGOUT SETTINGS
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'accounts:dashboard'
+LOGOUT_REDIRECT_URL = 'login'
+
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
