@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card auth-card">
+    <h2>Login</h2>
+
+    <p class="subtitle">
+        Sign in to access the Youth Justice Project dashboard and protected case management features.
+    </p>
+
+    {% if form.errors %}
+        <div class="error-box">
+            Invalid username or password. Please check your details and try again.
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit" class="btn">Login</button>
+    </form>
+
+    <div class="auth-footer">
+        Do not have an account?
+        <a href="{% url 'accounts:register' %}">Create an account</a>
+    </div>
+</div>
+{% endblock %}
