@@ -33,9 +33,12 @@ def recommendations(request, youth_id):
     """
     youth = get_object_or_404(Youth, id=youth_id)
 
-    latest_offence = youth.offence_set.order_by("-date_reported").first()
+    # Use "offences" because your Offence model uses related_name="offences"
+    latest_offence = youth.offences.order_by("-date_reported").first()
 
-    programs = youth.get_recommended_programs()
+    # Use recommend_programs() because this is the method in your current Youth model
+    programs = youth.recommend_programs()
+
     reasons = []
 
     if latest_offence:

@@ -1,66 +1,38 @@
-<!-- justice_app/templates/home.html -->
+{% extends "base.html" %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Youth Justice Dashboard</title>
-    <style>
-        body {
-            font-family: Arial;
-            background-color: #f5f7fa;
-            margin: 0;
-        }
-        header {
-            background-color: #2c3e50;
-            color: white;
-            padding: 15px;
-            text-align: center;
-        }
-        .container {
-            padding: 20px;
-        }
-        .card {
-            background: white;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .btn {
-            background: #3498db;
-            color: white;
-            padding: 8px 12px;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-    </style>
-</head>
-<body>
-
-<header>
-    <h1>Youth Diversion & Support System</h1>
-</header>
-
-<div class="container">
-
+{% block content %}
+<div class="card">
     <h2>Registered Youths</h2>
 
-    {% for youth in youths %}
-    <div class="card">
-        <h3>{{ youth.name }} (Age: {{ youth.age }})</h3>
-        <p>Gender: {{ youth.gender }}</p>
-        <p>School Status: {{ youth.school_status }}</p>
-        <p>Support Level: {{ youth.family_support_level }}</p>
+    <p class="subtitle">
+        This page displays registered youth profiles available in the Youth Justice Project.
+    </p>
 
-        <a class="btn" href="{% url 'recommendations' youth.id %}">
-            View Recommendations
-        </a>
-    </div>
-    {% empty %}
-    <p>No youth records available.</p>
-    {% endfor %}
+    {% if youths %}
+        <div class="dashboard-grid">
+            {% for youth in youths %}
+                <div class="dashboard-card">
+                    <h3>{{ youth.name }}</h3>
 
+                    <p>
+                        <strong>Age:</strong> {{ youth.age }}<br>
+                        <strong>Gender:</strong> {{ youth.gender }}<br>
+                        <strong>School Status:</strong> {{ youth.school_status }}<br>
+                        <strong>Family Support Level:</strong> {{ youth.family_support_level }}
+                    </p>
+
+                    {% if request.user.is_superuser or perms.justice_app.change_youth %}
+                        <a href="{% url 'recommendations' youth.id %}">View Recommendations</a>
+                    {% else %}
+                        <span class="user-badge">View only access</span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="subtitle">
+            No youth records have been added yet. Please add youth records from the Django admin panel.
+        </p>
+    {% endif %}
 </div>
-
-</body>
-</html>
+{% endblock %}
