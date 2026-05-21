@@ -1,32 +1,41 @@
 from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required, permission_required
+
 from .models import Youth
+from accounts.decorators import volunteer_or_above_required, case_worker_required
 
 
+@login_required
+@permission_required("justice_app.view_youth", raise_exception=True)
+@volunteer_or_above_required
 def home(request):
     """
     Display all registered youths on the home page.
-    Ordered by newest first.
+    Only authenticated users with view_youth permission can access this page.
     """
-    youths = Youth.objects.all().order_by('-created_at')
+    youths = Youth.objects.all().order_by("-id")
 
     context = {
-        'youths': youths
+        "youths": youths
     }
 
-    return render(request, 'home.html', context)
+    return render(request, "home.html", context)
 
 
+@login_required
+@permission_required("justice_app.view_youth", raise_exception=True)
+@permission_required("justice_app.view_supportprogram", raise_exception=True)
+@case_worker_required
 def recommendations(request, youth_id):
     """
     Show recommended support programs for a selected youth.
-    Also explain why these recommendations were generated.
+    Only Admin and Case Worker users can access recommendations.
     """
     youth = get_object_or_404(Youth, id=youth_id)
 
-    # Get latest offence for decision logic
-    latest_offence = youth.offences.order_by('-date_reported').first()
+    latest_offence = youth.offence_set.order_by("-date_reported").first()
 
-    programs = youth.recommend_programs()
+    programs = youth.get_recommended_programs()
     reasons = []
 
     if latest_offence:
@@ -52,10 +61,10 @@ def recommendations(request, youth_id):
         reasons.append("No exact program match was found based on the current rules.")
 
     context = {
-        'youth': youth,
-        'programs': programs,
-        'reasons': reasons,
-        'latest_offence': latest_offence,
+        "youth": youth,
+        "programs": programs,
+        "reasons": reasons,
+        "latest_offence": latest_offence,
     }
 
-    return render(request, 'recommendations.html', context)
+    return render(request, "recommendations.html", context)

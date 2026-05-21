@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card auth-card">
+    <h2>Access Denied</h2>
+
+    <p class="subtitle">
+        You do not have permission to access this page. Please contact the system administrator if you believe this is incorrect.
+    </p>
+
+    <a href="{% url 'accounts:dashboard' %}" class="btn">Back to Dashboard</a>
+</div>
+{% endblock %}
