@@ -193,6 +193,24 @@
             font-size: 14px;
         }
 
+        .success-box {
+            background: #dcfce7;
+            color: #166534;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .info-box {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
@@ -295,6 +313,24 @@
     </div>
 
     <main class="page-wrapper">
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == "success" %}
+                    <div class="success-box">
+                        {{ message }}
+                    </div>
+                {% elif message.tags == "info" %}
+                    <div class="info-box">
+                        {{ message }}
+                    </div>
+                {% else %}
+                    <div class="error-box">
+                        {{ message }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
         {% block content %}
         {% endblock %}
     </main>

@@ -1,8 +1,10 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib import messages
 
 from .models import Youth
 from .services import get_all_youth_records, generate_support_recommendations
+from .exceptions import RecommendationGenerationError
 from accounts.decorators import volunteer_or_above_required, case_worker_required
 
 
@@ -34,13 +36,26 @@ def recommendations(request, youth_id):
     """
     youth = get_object_or_404(Youth, id=youth_id)
 
-    recommendation_data = generate_support_recommendations(youth)
+    try:
+        recommendation_data = generate_support_recommendations(youth)
 
-    context = {
-        "youth": youth,
-        "programs": recommendation_data["programs"],
-        "reasons": recommendation_data["reasons"],
-        "latest_offence": recommendation_data["latest_offence"],
-    }
+        context = {
+            "youth": youth,
+            "programs": recommendation_data["programs"],
+            "reasons": recommendation_data["reasons"],
+            "latest_offence": recommendation_data["latest_offence"],
+        }
+
+    except RecommendationGenerationError as error:
+        messages.error(request, str(error))
+
+        context = {
+            "youth": youth,
+            "programs": [],
+            "reasons": [
+                "The system could not generate recommendations for this youth at this time."
+            ],
+            "latest_offence": None,
+        }
 
     return render(request, "recommendations.html", context)
