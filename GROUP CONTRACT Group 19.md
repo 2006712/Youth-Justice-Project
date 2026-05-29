@@ -1,102 +1,173 @@
-Group Contract – Group 19
+# Group CONTRACT – Group 19
 
-Course: HIT237- Building Interactive Software.
-Project Research Question: What role and power does youth justice hold in crime?
-Repository: https://github.com/2006712/Youth-Justice-Project
+## Project Title
 
-Team Members
+Youth Justice Support Recommendation System
 
-Shereena Fernando – S387227
-Nathan Andrew Morgan – S391080
-Anjana Weththasinghe – S388871
-Raiz Karim Mukim - s375277 
+---
 
-Terms and Conditions of Group Work should be written in Section 1.
+# Group Members and Responsibilities
 
-Every member of the group is willing to work in a respectful, professional and responsible way. All members will actively participate in the entire process of project development such as planning, development, testing, documentation and review.
+| Member   | Responsibility Area                  | Main Contributions                                                                                                                         |
+| -------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Anjana Weththasinghe Mudiyanselage | Authentication and Role-Based Access | Implemented login/logout functionality, dashboard, Django groups, permissions, role-based access control, and account management features. |
+| Shereena Fernando | Service Layer and Business Logic     | Implemented the service layer architecture, moved recommendation logic into services.py, and improved separation of concerns.              |
+| Nathan Fernando | Exception Handling and Testing       | Added exception handling, created automated tests for models/services/permissions, and verified application behaviour.                     |
+| Raizul Mukim | Documentation, UI, and Integration   | Improved UI templates, updated project documentation, maintained GitHub repository, and integrated all project components.                 |
 
-GitHub commits, pull requests, and Microsoft Teams conversations will be used to track the contributions. Participation at an equal level is anticipated. In case of an uneven level of contribution, the group will discuss the topic based on a supportive evidence. Failure to make a contribution will be stepped up to lecturer should the need be.
+---
 
-Communication
+# Project Overview
 
-Main communication device: Microsoft Teams.
-Response time estimate: the time should not exceed 24 hours.
-Group members are required to inform the group beforehand in case of unavailability.
+The Youth Justice Support Recommendation System is a Django-based web application developed to assist youth justice organizations in managing youth records, offence information, and rehabilitation support recommendations.
 
-Co-operation and Task Management.
+The system allows authorized users to:
 
-Through weekly meetings tasks will be given out.
-Work will be monitored with the help of GitHub Issues, commits.
-Before integrating, all members have to revise the work of one another.
-Merging of code after review will be done by means of pull requests.
+* Manage youth profiles and offence records
+* Recommend suitable intervention programs
+* Control access using role-based permissions
+* Maintain structured rehabilitation workflows
+* Improve decision-making consistency for youth support planning
 
-Support and Conflict Resolution.
+The application uses a service-layer architecture to separate business logic from presentation logic and includes automated testing to improve reliability and maintainability.
 
-Preliminary assistance will be given on lagging members.
-Tasks may be redistributed if necessary
-The problems that still arise will be discussed by the group and increased in the event that they are not solved.
+---
 
-Academic honesty and use of AI.
+# Technologies Used
 
-Every work should be according to CDU academic integrity.
-The assistance of AI tools can be used (e.g., ChatGPT, Copilot).
-Every content created with AIs should be:
+| Technology                   | Purpose                               |
+| ---------------------------- | ------------------------------------- |
+| Python                       | Backend programming language          |
+| Django                       | Web application framework             |
+| SQLite                       | Database management                   |
+| HTML/CSS                     | Frontend templates and styling        |
+| Git & GitHub                 | Version control and collaboration     |
+| Django Authentication System | User authentication and authorization |
 
-Known by the donor.
-Discussed by the group.
-Properly used and recognized where necessary ethically.
+---
 
-Section 2: Interim Accomplishments and milestones.
+# Features Implemented
 
-Assessment 2 Plan (Group Project Report 1)
+## Phase 1 – Core Application Development
 
-Week 1: Scopes define project scope and GitHub repository setup.
-Week 2: Roles and research.
-Week 3: Build models, views, and system architecture.
-Week 4: Assemble integration and design choices.
-Week 5: Finalise documentation and submit.
+* Created Django project structure
+* Developed Youth and Offence models
+* Implemented support recommendation functionality
+* Created admin management pages
+* Added database relationships between youth and offences
 
-Assessment 4 Plan (Final Project)
+## Phase 2 – Authentication and Role-Based Access
 
-Week 6: Review feedback / improve system.
-Week 7: Develop and delegate new duties.
-Week 8: Reintegrate modules and test.
-Week 9: Establish problem-free systems and enhance the quality of systems.
-Week 10: Final checks and submission.
+* Created Accounts app
+* Added login and logout functionality
+* Created dashboard page
+* Implemented role-based access control
+* Configured user groups:
 
-Task Allocation
+  * Admin
+  * Case Worker
+  * Volunteer
+* Restricted access to pages based on permissions
 
-Shereena Fernando
-Documentation, ADR writing, coordination and progress monitoring.
+## Phase 3 – Advanced Permissions and UI Enhancements
 
-Nathan Andrew Morgan
-Counting of GIT management, version control and system integration.
+* Added custom decorators for role validation
+* Improved page navigation and dashboard experience
+* Added responsive layouts and professional styling
+* Restricted recommendation access to authorized users only
 
-Anjana Weththasinghe
-Business logic, model design and backend development.
+## Phase 4 – Service Layer Architecture
 
-Raiz Karim Mukim
-User interaction, frontend, and user interface design.
+* Created services.py
+* Moved business logic out of views.py
+* Added:
 
-All Members
+  * get_all_youth_records()
+  * generate_support_recommendations()
+* Improved maintainability and modularity
 
-Testing and debugging
-  Code inspection and quality control.
-Last validation before submission.
+## Phase 5 – Exception Handling and Testing
 
-Checkpoints and Monitoring
+* Created custom exception handling
+* Added recommendation error handling
+* Implemented automated testing for:
 
-Microsoft Teams meetings every week.
-Mid-week progress updates
-Real-time GIT commit monitoring.
-Use of pull requests for code review
-Last group consultation prior to submission.
+  * Models
+  * Services
+  * Permissions
+  * Authentication
+* Verified successful execution of all tests
 
-Integration Strategy
+---
 
-GitHub pull requests will be used to integrate all the work.
-Any change should be checked, verified and authorized to facilitate consistency and stability of the system.
+# User Roles and Access Levels
 
-Agreement
+| Role        | Access Level                                        |
+| ----------- | --------------------------------------------------- |
+| Admin       | Full system access including Django admin panel     |
+| Case Worker | Access to youth records and support recommendations |
+| Volunteer   | Read-only access to youth records                   |
 
-The group members all settle to adhere to this contract, share in an equal way, communicate well and maintain academic integrity during the project.
+---
+
+# GitHub Repository
+
+Repository URL:
+
+[https://github.com/2006712/Youth-Justice-Project](https://github.com/2006712/Youth-Justice-Project)
+
+---
+
+# Team Collaboration Agreement
+
+All group members agree to:
+
+* Contribute fairly to the project
+* Maintain regular communication
+* Use GitHub for version control
+* Follow coding standards and documentation practices
+* Test features before pushing updates
+* Respect deadlines and assigned responsibilities
+
+---
+
+# Testing Summary
+
+The application was tested using Django’s testing framework.
+
+Test coverage includes:
+
+* Model validation
+* Role-based access permissions
+* Authentication workflows
+* Service-layer recommendation generation
+* Youth and offence record management
+
+Final testing result:
+
+* 10 tests executed successfully
+* No failed tests
+* No system check issues identified
+
+---
+
+# Future Improvements
+
+Potential future enhancements include:
+
+* REST API integration
+* Advanced analytics dashboard
+* Machine-learning-based recommendations
+* Email notification support
+* Cloud database deployment
+* Mobile-responsive optimization
+
+---
+
+# Conclusion
+
+The Youth Justice Support Recommendation System successfully demonstrates the implementation of a secure, role-based Django application using layered architecture principles.
+
+The project provides structured youth management, offence tracking, and automated support recommendations while ensuring secure access control and maintainable software design.
+
+The final system is fully functional, tested, and version-controlled through GitHub collaboration.
